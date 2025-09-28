@@ -1,4 +1,4 @@
-import * as Localization from "react-native-localize";
+import * as Localization from 'expo-localization';
 import I18n from "i18n-js";
 
 const en = {

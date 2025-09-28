@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="app_title">MedConnect - Mobile Health App</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons for professional look -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Define the primary medical color palette and font */
+        :root {
+            --primary-color: #1e3a8a; /* Deep Blue - Trust */
+            --secondary-color: #34d399; /* Mint Green - Health */
+            --bg-light: #f3f4f6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+        }
+        
+        /* Custom Background Image for Welcome Page (Hippocrates) */
+        .welcome-bg {
+            background-image: url('https://placehold.co/1200x800/e0e0e0/555?text=Hippocrates+Bust');
+            background-size: cover;
+            background-position: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            /* Apply 30% Opacity */
+            opacity: 0.3;
+        }
+
+        /* Ensure content sits above the background */
+        .page-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .shadow-md-custom {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Custom button styling for a medical/clean look */
+        .btn-primary {
+            background-color: var(--primary-color);
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #1e40af;
+        }
+        .text-secondary {
+             color: var(--secondary-color);
+        }
+        
+        /* Specific Chat and Prescription Styles */
+        .chat-prescription {
+            border: 2px solid var(--secondary-color);
+            background-color: #ecfdf5; /* Light green background */
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        
+        /* Video Call container for mobile aspect ratio */
+        #video-call-interface {
+            aspect-ratio: 16 / 9;
+            max-width: 100%;
+            margin: 20px auto;
+        }
+        @media (min-width: 640px) {
+            #video-call-interface {
+                 max-height: 500px;
+                 width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen">
+        
+        <!-- Header for all pages -->
+        <header class="sticky top-0 bg-white shadow-md-custom p-4 flex justify-between items-center z-20">
+            <h1 class="text-xl font-bold text-blue-800" data-i18n="app_title">MedConnect</h1>
+            <div class="flex items-center space-x-3">
+                <button id="lang-toggle" onclick="toggleLanguage()" class="bg-gray-200 text-gray-800 text-sm font-semibold px-3 py-1 rounded-full hover:bg-gray-300 transition-colors">
+                    KN
+                </button>
+                <button id="back-btn" class="text-gray-600 hidden" onclick="goBack()">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 1. Welcome Page -->
+        <div id="welcome-page" class="page-view relative pt-16 h-full flex flex-col items-center justify-center text-center">
+            <div class="welcome-bg"></div>
+            <div class="page-content bg-white p-6 md:p-10 rounded-xl shadow-2xl max-w-sm mx-auto my-8">
+                <i data-lucide="heart-pulse" class="w-12 h-12 mx-auto text-secondary mb-4"></i>
+                <h2 class="text-3xl font-extrabold text-gray-800 mb-2" data-i18n="welcome_heading">Your Health Journey Starts Here</h2>
+                <p class="text-gray-600 mb-6" data-i18n="welcome_subheading">Connect with certified doctors for fast, reliable consultations.</p>
+
+                <!-- Free Services -->
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 class="text-xl font-semibold text-blue-700 mb-2 flex items-center justify-center" data-i18n="free_services_heading">
+                        <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Free Services Included
+                    </h3>
+                    <ul class="text-left text-gray-700 space-y-1 ml-4 list-disc">
+                        <li data-i18n="service_checker">Basic symptom checker</li>
+                        <li data-i18n="service_tips">Wellness tips & guides</li>
+                        <li data-i18n="service_chatbot">24/7 Health Chatbot access</li>
+                    </ul>
+                </div>
+
+                <!-- Toll-Free Number -->
+                <div class="mb-8 p-4 bg-gray-100 rounded-lg">
+                    <p class="text-gray-700 font-medium" data-i18n="contact_prompt">For immediate assistance, call us:</p>
+                    <a href="tel:7892165354" class="toll-free-number text-4xl font-mono tracking-wider text-blue-800 hover:text-blue-600 transition-colors block mt-2">
+                        7892165354
+                    </a>
+                </div>
+
+                <button onclick="showPage('doctors-page')" class="btn-primary w-full py-3 text-lg font-bold rounded-full text-white shadow-lg" data-i18n="button_find_doctor">
+                    Find a Doctor
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. Doctor's List Page -->
+        <div id="doctors-page" class="page-view hidden p-4 pt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2" data-i18n="doctors_heading">Available Specialists</h2>
+            
+            <div id="doctor-list" class="space-y-4">
+                <!-- Doctor Cards will be injected here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- 3. Patient Details Page -->
+        <div id="patient-details-page" class="page-view hidden p-4 pt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2" data-i18n="details_heading">Your Details for Consultation</h2>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <p class="mb-4 text-sm text-gray-600"><span data-i18n="consulting_with">You are consulting with</span> <span id="consulting-doctor" class="font-bold text-blue-700"></span>.</p>
+                <form id="patient-form" onsubmit="event.preventDefault(); submitPatientDetails();" class="space-y-4">
+                    <div>
+                        <label for="p-name" class="block text-sm font-medium text-gray-700" data-i18n="label_name">Full Name</label>
+                        <input type="text" id="p-name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="p-age" class="block text-sm font-medium text-gray-700" data-i18n="label_age">Age</label>
+                        <input type="number" id="p-age" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="p-contact" class="block text-sm font-medium text-gray-700" data-i18n="label_contact">Contact Details (for WhatsApp)</label>
+                        <input type="tel" id="p-contact" required pattern="[0-9]{10}" placeholder="10 digit number" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="p-aadhaar" class="block text-sm font-medium text-gray-700" data-i18n="label_aadhaar">Aadhaar Card Number</label>
+                        <input type="text" id="p-aadhaar" required pattern="[0-9]{12}" placeholder="12 digit number" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <button type="submit" class="btn-primary w-full py-3 font-bold rounded-lg text-white" data-i18n="button_start_consult">
+                        Start Consultation
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4. Consultation Page -->
+        <div id="consultation-page" class="page-view hidden p-4 pt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2" data-i18n="consult_heading">One-to-One Consultation</h2>
+            
+            <!-- Consultation Options View (initially visible) -->
+            <div id="consult-options" class="bg-white p-6 rounded-xl shadow-md text-center">
+                <p class="text-lg mb-6 text-gray-700"><span data-i18n="consult_prompt">How would you like to consult with</span> <span id="final-doctor" class="font-bold text-blue-700"></span>?</p>
+                
+                <div class="flex flex-col md:flex-row gap-4 mb-8">
+                    <!-- Message Option -->
+                    <button onclick="startConsultation('message')" class="flex-1 bg-green-500 hover:bg-green-600 text-white p-6 rounded-xl shadow-lg transition-all transform hover:scale-105">
+                        <i data-lucide="message-square" class="w-8 h-8 mx-auto mb-2"></i>
+                        <span class="text-xl font-bold" data-i18n="option_message">Message Chat</span>
+                        <p class="text-sm opacity-80 mt-1" data-i18n="consult_text">Text-based consult</p>
+                    </button>
+                    
+                    <!-- Video Call Option -->
+                    <button onclick="startConsultation('video')" class="flex-1 bg-red-500 hover:bg-red-600 text-white p-6 rounded-xl shadow-lg transition-all transform hover:scale-105">
+                        <i data-lucide="video" class="w-8 h-8 mx-auto mb-2"></i>
+                        <span class="text-xl font-bold" data-i18n="option_video">Video Call</span>
+                        <p class="text-sm opacity-80 mt-1" data-i18n="consult_visual">Live visual consult</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- New Chat Interface (initially hidden) -->
+            <div id="chat-interface" class="hidden bg-white p-4 rounded-xl shadow-md flex flex-col h-full max-h-[80vh]">
+                <h3 class="text-xl font-bold text-blue-700 mb-4"><span data-i18n="chat_with">Chat with</span> <span id="chat-doctor"></span></h3>
+                
+                <!-- Message History Area -->
+                <div id="chat-log" class="flex-grow overflow-y-auto p-3 mb-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
+                    <div class="text-center text-sm text-gray-500 italic mt-2" data-i18n="chat_initial_message" id="chat-start-message">
+                        You have connected with your doctor. Please send your first message.
+                    </div>
+                </div>
+
+                <!-- Input Field -->
+                <div class="flex space-x-2">
+                    <input type="text" id="chat-input" placeholder="" class="flex-grow border border-gray-300 rounded-full p-3 focus:ring-blue-500 focus:border-blue-500">
+                    <button onclick="sendMessage()" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full flex items-center justify-center transition-colors">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Button to end chat and return to options -->
+                <button onclick="endChat()" class="text-sm text-gray-500 hover:text-red-500 mt-3 transition-colors" data-i18n="chat_end">
+                    End Chat / Return to Options
+                </button>
+            </div>
+            
+            <!-- New Video Call Interface (initially hidden) -->
+            <div id="video-call-interface" class="hidden bg-gray-900 p-4 rounded-xl shadow-md flex flex-col mx-auto">
+                <div class="relative w-full bg-black rounded-lg overflow-hidden">
+                    <!-- Local Video Feed -->
+                    <video id="local-video" autoplay muted playsinline class="w-full h-full object-cover rounded-lg"></video>
+                    
+                    <!-- Status Message -->
+                    <div id="video-message" class="absolute inset-0 flex items-center justify-center text-white bg-black bg-opacity-70 text-lg">
+                        <i data-lucide="video-off" class="w-8 h-8 mr-2"></i> <span data-i18n="video_camera_required">Camera Access Required</span>
+                    </div>
+                    
+                    <!-- Doctor Placeholder (Simulated Remote Feed) -->
+                    <div id="doctor-placeholder" class="absolute top-4 right-4 w-1/4 h-1/4 bg-blue-800 rounded-lg border-2 border-white flex items-center justify-center text-white text-xs opacity-70">
+                        <i data-lucide="user" class="w-4 h-4"></i> Doctor
+                    </div>
+                </div>
+                <button onclick="endVideoCall()" class="bg-red-600 hover:bg-red-700 text-white p-3 mt-4 rounded-lg font-bold flex items-center justify-center transition-colors" data-i18n="video_end_call">
+                    End Call
+                </button>
+            </div>
+
+
+            
+            <div class="p-4 bg-blue-100 rounded-lg text-left text-gray-800 border-l-4 border-blue-500 mt-6">
+                <h4 class="font-semibold mb-1 flex items-center">
+                    <i data-lucide="shield-check" class="w-5 h-5 mr-2 text-blue-700"></i> <span data-i18n="policy_heading">Prescription Policy</span>
+                </h4>
+                <p class="text-sm" data-i18n="policy_text">Based on your illness, your doctor's official prescription will be securely sent to your registered contact details via **WhatsApp** after the consultation.</p>
+            </div>
+
+            <button onclick="showPage('welcome-page')" class="btn-primary w-full py-2 mt-8 font-medium rounded-lg text-white" data-i18n="button_back_home">
+                Back to Home
+            </button>
+        </div>
+
+        <!-- Custom Alert/Message Box -->
+        <div id="message-box" class="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center hidden z-50">
+            <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-11/12 text-center">
+                <h3 id="message-box-title" class="text-xl font-bold mb-3 text-blue-700" data-i18n="notification">Notification</h3>
+                <p id="message-box-text" class="text-gray-700 mb-6"></p>
+                <button onclick="hideMessageBox()" class="btn-primary py-2 px-6 rounded-lg text-white" data-i18n="button_ok">
+                    OK
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Global State Object (Declared only once to prevent redeclaration errors) ---
+        const appState = {
+            history: ['welcome-page'],
+            patientData: {},
+            selectedDoctor: null,
+            prescriptionGiven: false, 
+            localStream: null, // To hold the camera stream
+            currentLang: 'en' // Default language
+        };
+
+        // --- Translation Data ---
+        const translations = {
+            en: {
+                app_title: "MedConnect",
+                welcome_heading: "Your Health Journey Starts Here",
+                welcome_subheading: "Connect with certified doctors for fast, reliable consultations.",
+                free_services_heading: "Free Services Included",
+                service_checker: "Basic symptom checker",
+                service_tips: "Wellness tips & guides",
+                service_chatbot: "24/7 Health Chatbot access",
+                contact_prompt: "For immediate assistance, call us:",
+                button_find_doctor: "Find a Doctor",
+                doctors_heading: "Available Specialists",
+                degree: "Degree:",
+                specialization: "Specialization:",
+                timing: "Timing:",
+                button_consult: "Consult",
+                timing_slots: "Morning: 10am - 12pm | Evening: 5pm - 7pm",
+                details_heading: "Your Details for Consultation",
+                consulting_with: "You are consulting with",
+                label_name: "Full Name",
+                label_age: "Age",
+                label_contact: "Contact Details (for WhatsApp)",
+                label_aadhaar: "Aadhaar Card Number",
+                button_start_consult: "Start Consultation",
+                consult_heading: "One-to-One Consultation",
+                consult_prompt: "How would you like to consult with",
+                option_message: "Message Chat",
+                option_video: "Video Call",
+                consult_text: "Text-based consult",
+                consult_visual: "Live visual consult",
+                chat_with: "Chat with",
+                chat_placeholder: "Type your symptoms here...",
+                chat_end: "End Chat / Return to Options",
+                chat_initial_message: "You have connected with your doctor. Please send your first message.",
+                policy_heading: "Prescription Policy",
+                policy_text: "Based on your illness, your doctor's official prescription will be securely sent to your registered contact details via **WhatsApp** after the consultation.",
+                button_back_home: "Back to Home",
+                video_end_call: "End Call",
+                video_camera_required: "Camera Access Required",
+                video_connecting: "Connecting... Please grant camera access.",
+                video_access_denied: "Camera Access Denied. Call Failed.",
+                video_error_title: "Video Error",
+                video_error_text: "Could not access your camera or microphone. Please ensure permissions are granted or try the message option.",
+                notification: "Notification",
+                button_ok: "OK",
+                error_select_doctor: "Error: Please select a doctor before proceeding.",
+                error_fill_details: "Error: Please fill in your patient details first.",
+                call_connected: "Call Connected",
+                call_prompt_1: "Initiating a video call with",
+                call_prompt_2: "Please ensure your camera and microphone are enabled.",
+                chat_initiated: "Chat Initiated",
+                chat_started_with: "Starting a secure text consultation with",
+                chat_ended: "Chat Ended",
+                chat_ended_msg: "The consultation chat session has ended. You can choose a new consultation type or return to the homepage.",
+                details_saved: "Details Saved",
+                details_recorded_1: "Thank you,",
+                details_recorded_2: "Your details have been recorded. Proceeding to consultation with",
+                end_call_prescription_title: "Video Consultation Ended - Prescription Ready",
+                simulated_diagnosis: "Simulated Diagnosis:",
+                tablet_label: "Tablet:",
+                advice_label: "Advice:",
+                formal_prescription_sent: "The formal prescription is now being sent to your WhatsApp",
+                
+            },
+            kn: {
+                app_title: "ಮೆಡ್‌ಕನೆಕ್ಟ್",
+                welcome_heading: "ನಿಮ್ಮ ಆರೋಗ್ಯದ ಪ್ರಯಾಣ ಇಲ್ಲಿಂದ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ",
+                welcome_subheading: "ವೇಗದ, ವಿಶ್ವಾಸಾರ್ಹ ಸಮಾಲೋಚನೆಗಳಿಗಾಗಿ ಪ್ರಮಾಣೀಕೃತ ವೈದ್ಯರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ.",
+                free_services_heading: "ಉಚಿತ ಸೇವೆಗಳು ಸೇರಿವೆ",
+                service_checker: "ಮೂಲ ರೋಗಲಕ್ಷಣ ಪರಿಶೀಲಕ",
+                service_tips: "ಆರೋಗ್ಯ ಸಲಹೆಗಳು ಮತ್ತು ಮಾರ್ಗದರ್ಶಿಗಳು",
+                service_chatbot: "24/7 ಆರೋಗ್ಯ ಚಾಟ್‌ಬಾಟ್ ಪ್ರವೇಶ",
+                contact_prompt: "ತಕ್ಷಣದ ಸಹಾಯಕ್ಕಾಗಿ, ನಮಗೆ ಕರೆ ಮಾಡಿ:",
+                button_find_doctor: "ವೈದ್ಯರನ್ನು ಹುಡುಕಿ",
+                doctors_heading: "ಲಭ್ಯವಿರುವ ತಜ್ಞರು",
+                degree: "ಪದವಿ:",
+                specialization: "ವಿಶೇಷತೆ:",
+                timing: "ಸಮಯ:",
+                button_consult: "ಸಮಾಲೋಚಿಸಿ",
+                timing_slots: "ಬೆಳಿಗ್ಗೆ: 10am - 12pm | ಸಂಜೆ: 5pm - 7pm",
+                details_heading: "ಸಮಾಲೋಚನೆಗಾಗಿ ನಿಮ್ಮ ವಿವರಗಳು",
+                consulting_with: "ನೀವು ಇವರೊಂದಿಗೆ ಸಮಾಲೋಚಿಸುತ್ತಿದ್ದೀರಿ",
+                label_name: "ಪೂರ್ಣ ಹೆಸರು",
+                label_age: "ವಯಸ್ಸು",
+                label_contact: "ಸಂಪರ್ಕ ವಿವರಗಳು (ವಾಟ್ಸಾಪ್‌ಗಾಗಿ)",
+                label_aadhaar: "ಆಧಾರ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆ",
+                button_start_consult: "ಸಮಾಲೋಚನೆ ಪ್ರಾರಂಭಿಸಿ",
+                consult_heading: "ಒಬ್ಬರಿಗೊಬ್ಬರು ಸಮಾಲೋಚನೆ",
+                consult_prompt: "ನೀವು ಇವರೊಂದಿಗೆ ಹೇಗೆ ಸಮಾಲೋಚಿಸಲು ಬಯಸುತ್ತೀರಿ",
+                option_message: "ಸಂದೇಶ ಚಾಟ್",
+                option_video: "ವೀಡಿಯೊ ಕರೆ",
+                consult_text: "ಪಠ್ಯ ಆಧಾರಿತ ಸಮಾಲೋಚನೆ",
+                consult_visual: "ಲೈವ್ ದೃಶ್ಯ ಸಮಾಲೋಚನೆ",
+                chat_with: "ಇದರೊಂದಿಗೆ ಚಾಟ್ ಮಾಡಿ",
+                chat_placeholder: "ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ಇಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ...",
+                chat_end: "ಚಾಟ್ ಮುಗಿಸಿ / ಆಯ್ಕೆಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+                chat_initial_message: "ನೀವು ನಿಮ್ಮ ವೈದ್ಯರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿದ್ದೀರಿ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಮೊದಲ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಿ.",
+                policy_heading: "ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ನೀತಿ",
+                policy_text: "ನಿಮ್ಮ ಅನಾರೋಗ್ಯದ ಆಧಾರದ ಮೇಲೆ, ಸಮಾಲೋಚನೆಯ ನಂತರ ನಿಮ್ಮ ವೈದ್ಯರ ಅಧಿಕೃತ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಅನ್ನು ನಿಮ್ಮ ನೋಂದಾಯಿತ ಸಂಪರ್ಕ ವಿವರಗಳಿಗೆ **WhatsApp** ಮೂಲಕ ಸುರಕ್ಷಿತವಾಗಿ ಕಳುಹಿಸಲಾಗುತ್ತದೆ.",
+                button_back_home: "ಮನೆಗೆ ಹಿಂತಿರುಗಿ",
+                video_end_call: "ಕರೆ ಮುಗಿಸಿ",
+                video_camera_required: "ಕ್ಯಾಮೆರಾ ಪ್ರವೇಶ ಅಗತ್ಯವಿದೆ",
+                video_connecting: "ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ... ದಯವಿಟ್ಟು ಕ್ಯಾಮೆರಾ ಪ್ರವೇಶವನ್ನು ನೀಡಿ.",
+                video_access_denied: "ಕ್ಯಾಮೆರಾ ಪ್ರವೇಶ ನಿರಾಕರಿಸಲಾಗಿದೆ. ಕರೆ ವಿಫಲವಾಗಿದೆ.",
+                video_error_title: "ವೀಡಿಯೊ ದೋಷ",
+                video_error_text: "ನಿಮ್ಮ ಕ್ಯಾಮರಾ ಅಥವಾ ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಅನುಮತಿಗಳನ್ನು ನೀಡಲಾಗಿದೆಯೇ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ ಅಥವಾ ಸಂದೇಶ ಆಯ್ಕೆಯನ್ನು ಪ್ರಯತ್ನಿಸಿ.",
+                notification: "ಅಧಿಸೂಚನೆ",
+                button_ok: "ಸರಿ",
+                error_select_doctor: "ದೋಷ: ಮುಂದುವರಿಯುವ ಮೊದಲು ದಯವಿಟ್ಟು ವೈದ್ಯರನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.",
+                error_fill_details: "ದೋಷ: ದಯವಿಟ್ಟು ಮೊದಲು ನಿಮ್ಮ ರೋಗಿಯ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.",
+                call_connected: "ಕರೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ",
+                call_prompt_1: "ಇದರೊಂದಿಗೆ ವೀಡಿಯೊ ಕರೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ",
+                call_prompt_2: "ದಯವಿಟ್ಟು ನಿಮ್ಮ ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ರೊಫೋನ್ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆಯೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.",
+                chat_initiated: "ಚಾಟ್ ಪ್ರಾರಂಭವಾಗಿದೆ",
+                chat_started_with: "ಇದರೊಂದಿಗೆ ಸುರಕ್ಷಿತ ಪಠ್ಯ ಸಮಾಲೋಚನೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ",
+                chat_ended: "ಚಾಟ್ ಮುಗಿದಿದೆ",
+                chat_ended_msg: "ಸಮಾಲೋಚನೆ ಚಾಟ್ ಅವಧಿ ಮುಗಿದಿದೆ. ನೀವು ಹೊಸ ಸಮಾಲೋಚನೆ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆ ಮಾಡಬಹುದು ಅಥವಾ ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಬಹುದು.",
+                details_saved: "ವಿವರಗಳನ್ನು ಉಳಿಸಲಾಗಿದೆ",
+                details_recorded_1: "Thank you,",
+                details_recorded_2: "Your details have been recorded. Proceeding to consultation with",
+                end_call_prescription_title: "Video Consultation Ended - Prescription Ready",
+                simulated_diagnosis: "ಅನುಕರಿಸಿದ ರೋಗನಿರ್ಣಯ:",
+                tablet_label: "ಟ್ಯಾಬ್ಲೆಟ್:",
+                advice_label: "ಸಲಹೆ:",
+                formal_prescription_sent: "ಔಪಚಾರಿಕ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಅನ್ನು ಈಗ ನಿಮ್ಮ WhatsApp ಗೆ ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ",
+            }
+        };
+
+
+        // --- Doctor Data ---
+        const doctors = [
+            { name: "Dr. Rakshit", degree: "MBBS", specialization: "General Medicine" },
+            { name: "Dr. Sneha", degree: "MBBS", specialization: "Gynecology" },
+            { name: "Dr. Vijay", degree: "MBBS", specialization: "Orthopedics" },
+        ];
+        
+        // --- Simulated Prescriptions (Now includes bilingual content) ---
+        const prescriptions = {
+            fever: {
+                en: {
+                    diagnosis: "Mild viral fever",
+                    tablets: "Paracetamol 500mg (Take 1 tablet every 6 hours after food for 3 days)",
+                    advice: "Rest well and stay hydrated. If fever persists past 3 days, please schedule a video consultation."
+                },
+                kn: {
+                    diagnosis: "ಸೌಮ್ಯ ವೈರಲ್ ಜ್ವರ (Mild viral fever)",
+                    tablets: "ಪ್ಯಾರಾಸೆಟಮೋಲ್ 500mg (3 ದಿನಗಳವರೆಗೆ ಊಟದ ನಂತರ ಪ್ರತಿ 6 ಗಂಟೆಗಳಿಗೊಮ್ಮೆ 1 ಟ್ಯಾಬ್ಲೆಟ್ ತೆಗೆದುಕೊಳ್ಳಿ)",
+                    advice: "ಚೆನ್ನಾಗಿ ವಿಶ್ರಾಂತಿ ತೆಗೆದುಕೊಳ್ಳಿ ಮತ್ತು ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ. 3 ದಿನಗಳ ನಂತರವೂ ಜ್ವರ ಮುಂದುವರಿದರೆ, ದಯವಿಟ್ಟು ವೀಡಿಯೊ ಸಮಾಲೋಚನೆಗಾಗಿ ನಿಗದಿಪಡಿಸಿ."
+                }
+            },
+            headache: {
+                en: {
+                    diagnosis: "Tension headache",
+                    tablets: "Ibuprofen 200mg (Take 1 tablet as needed, max 3 per day)",
+                    advice: "Try some relaxation techniques. Avoid screen time before bed."
+                },
+                kn: {
+                    diagnosis: "ಟೆನ್ಷನ್ ತಲೆನೋವು (Tension headache)",
+                    tablets: "ಐಬುಪ್ರೊಫೆನ್ 200mg (ಅಗತ್ಯವಿದ್ದಾಗ 1 ಟ್ಯಾಬ್ಲೆಟ್ ತೆಗೆದುಕೊಳ್ಳಿ, ದಿನಕ್ಕೆ ಗರಿಷ್ಠ 3)",
+                    advice: "ಕೆಲವು ವಿಶ್ರಾಂತಿ ತಂತ್ರಗಳನ್ನು ಪ್ರಯತ್ನಿಸಿ. ಮಲಗುವ ಮುನ್ನ ಪರದೆಯ ಸಮಯವನ್ನು ತಪ್ಪಿಸಿ."
+                }
+            },
+            stomach: { 
+                en: {
+                    diagnosis: "Mild indigestion",
+                    tablets: "Antacid (Take 1 tablet 30 minutes before meals, twice a day for 2 days)",
+                    advice: "Eat bland foods. If pain worsens or you vomit, seek emergency care."
+                },
+                kn: {
+                    diagnosis: "ಸೌಮ್ಯ ಅಜೀರ್ಣ (Mild indigestion)",
+                    tablets: "ಆಂಟಾಸಿಡ್ (ಊಟಕ್ಕೆ 30 ನಿಮಿಷಗಳ ಮೊದಲು, ದಿನಕ್ಕೆ ಎರಡು ಬಾರಿ 2 ದಿನಗಳವರೆಗೆ 1 ಟ್ಯಾಬ್ಲೆಟ್ ತೆಗೆದುಕೊಳ್ಳಿ)",
+                    advice: "ಸಪ್ಪೆ ಆಹಾರಗಳನ್ನು ಸೇವಿಸಿ. ನೋವು ಹೆಚ್ಚಾದರೆ ಅಥವಾ ವಾಂತಿ ಮಾಡಿದರೆ, ತುರ್ತು ಆರೈಕೆಯನ್ನು ಪಡೆಯಿರಿ."
+                }
+            }
+        };
+
+
+        // --- Single Page Application (SPA) Navigation Logic ---
+        // Variables now accessed via appState object to prevent redeclaration
+        
+        function setLanguage(lang) {
+            appState.currentLang = lang;
+            const elements = document.querySelectorAll('[data-i18n]');
+            
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    // Handle input placeholders specifically
+                    if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
+                        el.setAttribute('placeholder', translations[lang][key]);
+                    } else if (el.tagName !== 'INPUT') {
+                         el.textContent = translations[lang][key];
+                    }
+                }
+            });
+
+            // Re-render dynamic elements that don't use data-i18n well (like doctor list)
+            renderDoctorList();
+            
+            // Update the language toggle button text
+            const toggleBtn = document.getElementById('lang-toggle');
+            toggleBtn.textContent = lang === 'en' ? 'KN' : 'EN';
+            
+            // Update placeholder text for chat input specifically
+            document.getElementById('chat-input').placeholder = translations[appState.currentLang].chat_placeholder;
+            
+            // Update page-specific texts that are composed of multiple parts
+            updateNavigation(appState.history[appState.history.length - 1]);
+        }
+        
+        function toggleLanguage() {
+            setLanguage(appState.currentLang === 'en' ? 'kn' : 'en');
+        }
+
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-view').forEach(page => {
+                page.classList.add('hidden');
+            });
+
+            // Show the requested page
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+
+            // Update history only if navigating forward/sideways
+            if (appState.history[appState.history.length - 1] !== pageId) {
+                appState.history.push(pageId);
+            }
+            
+            // Cleanup interfaces when navigating away from consultation page
+            if (pageId !== 'consultation-page') {
+                endChat(false); // Reset chat/prescription state
+                endVideoCall(false); // Stop camera if running
+            }
+
+            updateNavigation(pageId);
+            // Re-render icons after DOM manipulation
+            lucide.createIcons(); 
+        }
+
+        function goBack() {
+            if (appState.history.length > 1) {
+                appState.history.pop(); // Remove current page
+                const previousPageId = appState.history[appState.history.length - 1];
+                
+                // Hide all pages
+                document.querySelectorAll('.page-view').forEach(page => page.classList.add('hidden'));
+                
+                // Show previous page
+                const previousPage = document.getElementById(previousPageId);
+                if (previousPage) {
+                    previousPage.classList.remove('hidden');
+                }
+                updateNavigation(previousPageId);
+            }
+        }
+        
+        function updateNavigation(currentPageId) {
+            const backBtn = document.getElementById('back-btn');
+            
+            if (currentPageId !== 'welcome-page' && appState.history.length > 1) {
+                backBtn.classList.remove('hidden');
+            } else {
+                backBtn.classList.add('hidden');
+                if (currentPageId === 'welcome-page') {
+                    appState.history = ['welcome-page'];
+                }
+            }
+            
+            // Update dynamic text with names
+            const docName = appState.selectedDoctor || (appState.currentLang === 'en' ? "a Doctor" : "ಒಬ್ಬ ವೈದ್ಯರು");
+            
+            if (currentPageId === 'patient-details-page') {
+                 document.getElementById('consulting-doctor').textContent = docName;
+            }
+            if (currentPageId === 'consultation-page') {
+                 document.getElementById('final-doctor').textContent = docName;
+            }
+        }
+
+        // --- Message Box Functionality ---
+        function showMessageBox(title, text) {
+            document.getElementById('message-box-title').innerHTML = title;
+            document.getElementById('message-box-text').innerHTML = text;
+            document.getElementById('message-box').classList.remove('hidden');
+            lucide.createIcons(); 
+        }
+
+        function hideMessageBox() {
+            document.getElementById('message-box').classList.add('hidden');
+        }
+
+        // --- Application Feature Logic ---
+
+        function renderDoctorList() {
+             const listContainer = document.getElementById('doctor-list');
+             listContainer.innerHTML = ''; // Clear existing cards
+             const t = translations[appState.currentLang];
+             const timingText = t.timing_slots;
+            
+            doctors.forEach(doctor => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-xl shadow-md border-l-4 border-secondary';
+                card.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <i data-lucide="user-check" class="w-6 h-6 mr-3 text-primary-color"></i>
+                        <h3 class="text-xl font-semibold text-gray-900">${doctor.name}</h3>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-1"><strong class="text-gray-800">${t.degree}</strong> ${doctor.degree}</p>
+                    <p class="text-base font-medium text-blue-600 mb-3"><strong class="text-gray-800">${t.specialization}</strong> ${doctor.specialization}</p>
+                    <div class="text-sm bg-yellow-50 p-2 rounded-lg mb-4 flex items-center">
+                        <i data-lucide="clock" class="w-4 h-4 mr-2 text-yellow-700"></i>
+                        <span class="text-yellow-800">${timingText}</span>
+                    </div>
+                    <button onclick="selectDoctor('${doctor.name}')" class="btn-primary w-full py-2 text-sm font-medium rounded-lg text-white">
+                        ${t.button_consult} ${doctor.specialization}
+                    </button>
+                `;
+                listContainer.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function selectDoctor(name) {
+            appState.selectedDoctor = name;
+            showPage('patient-details-page');
+        }
+
+        function submitPatientDetails() {
+            const name = document.getElementById('p-name').value;
+            const age = document.getElementById('p-age').value;
+            const contact = document.getElementById('p-contact').value;
+            const aadhaar = document.getElementById('p-aadhaar').value;
+            const t = translations[appState.currentLang];
+            
+            appState.patientData = { name, age, contact, aadhaar, doctor: appState.selectedDoctor };
+
+            if (!appState.selectedDoctor) {
+                 showMessageBox(t.notification, t.error_select_doctor);
+                 return;
+            }
+
+            const successText = `${t.details_recorded_1} ${name}. ${t.details_recorded_2} ${appState.selectedDoctor}.`;
+            showMessageBox(t.details_saved, successText);
+            
+            setTimeout(() => {
+                hideMessageBox();
+                showPage('consultation-page');
+            }, 1500);
+        }
+
+        function startConsultation(type) {
+            const t = translations[appState.currentLang];
+            if (!appState.patientData.name) {
+                showMessageBox(t.notification, t.error_fill_details);
+                showPage('patient-details-page');
+                return;
+            }
+            
+            const consultOptions = document.getElementById('consult-options');
+            const chatInterface = document.getElementById('chat-interface');
+            
+            endChat(false);
+            endVideoCall(false);
+            consultOptions.classList.add('hidden');
+
+            if (type === 'message') {
+                chatInterface.classList.remove('hidden');
+                document.getElementById('chat-doctor').textContent = appState.patientData.doctor;
+                showMessageBox(t.chat_initiated, `${t.chat_started_with} ${appState.patientData.doctor}.`);
+
+            } else if (type === 'video') {
+                startVideoCall();
+            }
+        }
+        
+        function startVideoCall() {
+            const videoInterface = document.getElementById('video-call-interface');
+            const videoElement = document.getElementById('local-video');
+            const videoMessage = document.getElementById('video-message');
+            const consultOptions = document.getElementById('consult-options');
+            const t = translations[appState.currentLang];
+
+            consultOptions.classList.add('hidden');
+            videoInterface.classList.remove('hidden');
+            videoMessage.innerHTML = `<i data-lucide="loader" class="w-8 h-8 mr-2 animate-spin"></i> ${t.video_connecting}`;
+            videoMessage.classList.remove('hidden');
+            
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(stream => {
+                    appState.localStream = stream;
+                    videoElement.srcObject = stream;
+                    videoMessage.classList.add('hidden');
+                    showMessageBox(t.call_connected, `${t.call_prompt_1} ${appState.patientData.doctor}. ${t.call_prompt_2}`);
+                })
+                .catch(error => {
+                    console.error('Error accessing camera/mic:', error);
+                    videoMessage.innerHTML = `<i data-lucide="video-off" class="w-8 h-8 mr-2"></i> ${t.video_access_denied}`;
+                    videoMessage.classList.remove('hidden');
+                    showMessageBox(t.video_error_title, t.video_error_text);
+                });
+        }
+        
+        function endVideoCall(showMessage = true) {
+            const videoInterface = document.getElementById('video-call-interface');
+            const consultOptions = document.getElementById('consult-options');
+            const t = translations[appState.currentLang];
+            
+            if (appState.localStream) {
+                appState.localStream.getTracks().forEach(track => track.stop());
+                appState.localStream = null;
+            }
+            
+            videoInterface.classList.add('hidden');
+            consultOptions.classList.remove('hidden');
+
+            if (showMessage) {
+                // Get bilingual content for prescription
+                const rxContent = prescriptions['fever'][appState.currentLang];
+                
+                const prescriptionText = `
+                    <p class="font-bold text-blue-700 mb-2">${t.simulated_diagnosis} ${rxContent.diagnosis}</p>
+                    
+                    <div class="chat-prescription p-3 rounded-lg mt-2 text-sm text-gray-800">
+                        <i data-lucide="pill" class="inline w-4 h-4 mr-1 text-secondary"></i>
+                        <span class="font-bold">${t.tablet_label}</span> ${rxContent.tablets}<br>
+                        <i data-lucide="hand-heart" class="inline w-4 h-4 mr-1 text-secondary"></i>
+                        <span class="font-bold">${t.advice_label}</span> ${rxContent.advice}
+                    </div>
+                    <p class="mt-4 font-bold text-green-700">${t.formal_prescription_sent} (${appState.patientData.contact}).</p>
+                `;
+    
+                showMessageBox(t.end_call_prescription_title, prescriptionText);
+            }
+            
+            lucide.createIcons();
+        }
+
+        function endChat(showMessage = true) {
+            const consultOptions = document.getElementById('consult-options');
+            const chatInterface = document.getElementById('chat-interface');
+            const chatLog = document.getElementById('chat-log');
+            const t = translations[appState.currentLang];
+            
+            chatInterface.classList.add('hidden');
+            consultOptions.classList.remove('hidden');
+            
+            if (chatLog) {
+                 chatLog.innerHTML = `<div class="text-center text-sm text-gray-500 italic mt-2" data-i18n="chat_initial_message" id="chat-start-message">
+                                    ${t.chat_initial_message}
+                                </div>`;
+            }
+            appState.prescriptionGiven = false;
+            
+            if (showMessage) {
+                 showMessageBox(t.chat_ended, t.chat_ended_msg);
+            }
+        }
+
+        function sendMessage() {
+            const chatInput = document.getElementById('chat-input');
+            const message = chatInput.value.trim();
+            const chatLog = document.getElementById('chat-log');
+            const t = translations[appState.currentLang];
+
+            if (message === "") return;
+
+            // 1. Display Patient Message
+            const patientMessageDiv = document.createElement('div');
+            patientMessageDiv.className = 'flex justify-end'; 
+            patientMessageDiv.innerHTML = `
+                <div class="bg-blue-500 text-white text-sm p-3 rounded-t-xl rounded-bl-xl max-w-[80%] shadow">
+                    ${message}
+                </div>
+            `;
+            chatLog.appendChild(patientMessageDiv);
+            chatLog.scrollTop = chatLog.scrollHeight;
+            chatInput.value = '';
+
+            // 2. Simulated Doctor Response (with Prescription Logic)
+            setTimeout(() => {
+                let doctorResponseHtml;
+                const lowerCaseMessage = message.toLowerCase();
+                let prescriptionKey = null;
+
+                if (!appState.prescriptionGiven) {
+                    if (lowerCaseMessage.includes('fever')) {
+                        prescriptionKey = 'fever';
+                    } else if (lowerCaseMessage.includes('headache')) {
+                        prescriptionKey = 'headache';
+                    } else if (lowerCaseMessage.includes('stomach') || lowerCaseMessage.includes('pain')) {
+                        prescriptionKey = 'stomach';
+                    }
+                }
+
+                if (prescriptionKey) {
+                    // Get the content for the current language
+                    const rxContent = prescriptions[prescriptionKey][appState.currentLang];
+                    
+                    // Response confirming diagnosis
+                    doctorResponseHtml = `
+                        <p class="mb-2">Thank you for sharing your symptoms. Based on your description, my preliminary diagnosis is **${rxContent.diagnosis}**.</p>
+                        
+                        <p class="mb-2 font-bold text-green-700">Here is the advised temporary prescription:</p>
+
+                        <!-- Prescription Display (Using bilingual content) -->
+                        <div class="chat-prescription p-3 rounded-lg mt-2 text-sm text-gray-800">
+                            <i data-lucide="pill" class="inline w-4 h-4 mr-1 text-secondary"></i>
+                            <span class="font-bold">${t.tablet_label}</span> ${rxContent.tablets}<br>
+                            <i data-lucide="hand-heart" class="inline w-4 h-4 mr-1 text-secondary"></i>
+                            <span class="font-bold">${t.advice_label}</span> ${rxContent.advice}
+                        </div>
+                        
+                        <p class="mt-3 text-xs italic text-gray-600">${t.formal_prescription_sent} shortly. Please follow the instructions.</p>
+                    `;
+                    appState.prescriptionGiven = true; 
+                } else if (!appState.prescriptionGiven) {
+                     doctorResponseHtml = `Thank you for the information. I'm ${appState.patientData.doctor}. Could you please elaborate on the severity and frequency of your symptoms?`;
+                } else {
+                     doctorResponseHtml = `I have already provided a prescription based on your initial description. If you have further questions or the symptoms worsen, please use the video call option or end the chat to start a new consultation.`;
+                }
+
+
+                // 3. Display Doctor Message
+                const doctorDiv = document.createElement('div');
+                doctorDiv.className = 'flex justify-start'; 
+                doctorDiv.innerHTML = `
+                    <div class="bg-gray-200 text-gray-800 text-sm p-3 rounded-t-xl rounded-br-xl max-w-[80%] shadow">
+                        ${doctorResponseHtml}
+                    </div>
+                `;
+                chatLog.appendChild(doctorDiv);
+                
+                lucide.createIcons();
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }, 1000);
+        }
+
+        // Initialize the app on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Initial Language Setup (Default to English)
+            setLanguage('en'); 
+            
+            // 2. Initial render of the Doctor List
+            renderDoctorList();
+            
+            // 3. Initialize Event Listeners
+            document.getElementById('chat-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // 4. Start the app
+            lucide.createIcons();
+            showPage('welcome-page'); 
+        });
+
+    </script>
+</body>
+</html>
