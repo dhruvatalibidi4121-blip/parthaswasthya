@@ -1,32 +1,30 @@
+// doctor-app/src/App.js
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { View, Text, Button } from "react-native";
+
+import Welcome from "./screens/Welcome";
+import DoctorsList from "./screens/DoctorsList";
+import PatientDetails from "./screens/PatientDetails";
+import Consultation from "./screens/Consultation";
 
 const Stack = createStackNavigator();
-
-function HomeScreen({ navigation }) {
-  return (
-    <View style={{ flex:1, alignItems:"center", justifyContent:"center" }}>
-      <Text>👩‍⚕️ Welcome, Doctor!</Text>
-      <Button title="View Patients" onPress={() => navigation.navigate("Patients")} />
-    </View>
-  );
-}
-
-function PatientsScreen() {
-  return (
-    <View style={{ flex:1, alignItems:"center", justifyContent:"center" }}>
-      <Text>📋 Patient List (coming soon)</Text>
-    </View>
-  );
-}
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Patients" component={PatientsScreen} />
+      <Stack.Navigator
+        initialRouteName="Welcome"
+        screenOptions={{
+          headerStyle: { backgroundColor: "#0B6E4F" },
+          headerTintColor: "#fff",
+          headerTitleStyle: { fontWeight: "600" },
+        }}
+      >
+        <Stack.Screen name="Welcome" component={Welcome} />
+        <Stack.Screen name="Doctors" component={DoctorsList} />
+        <Stack.Screen name="PatientDetails" component={PatientDetails} />
+        <Stack.Screen name="Consultation" component={Consultation} />
       </Stack.Navigator>
     </NavigationContainer>
   );
